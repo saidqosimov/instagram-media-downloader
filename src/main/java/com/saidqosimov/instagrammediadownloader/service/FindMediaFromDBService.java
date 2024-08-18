@@ -20,8 +20,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FindMediaFromDBService {
     private final MediaDataRepository mediaDataRepository;
-    private final BotConfig botConfig;
-    String channelId = botConfig.getChannelId();
 
     public void addMediaData(String mediaUrl, Integer messageId, PostType postType) {
         if (mediaUrl.startsWith("https://www.instagram.com/p/") || mediaUrl.startsWith("https://www.instagram.com/reels/") || mediaUrl.startsWith("https://www.instagram.com/reel/")) {
@@ -34,7 +32,7 @@ public class FindMediaFromDBService {
         mediaDataRepository.save(mediaDataEntity);
     }
 
-    public List<CodeMessage> getMediaFromDB(String mediaUrl, Long chatId) {
+    public List<CodeMessage> getMediaFromDB(String mediaUrl, Long chatId, String channelId) {
         if (mediaUrl.startsWith("https://www.instagram.com/p/") || mediaUrl.startsWith("https://www.instagram.com/reels/") || mediaUrl.startsWith("https://www.instagram.com/reel/")) {
             mediaUrl = "https://www.instagram.com/p/" + mediaUrl.split("/")[4];
         }

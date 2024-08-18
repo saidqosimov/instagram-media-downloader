@@ -71,7 +71,7 @@ public class MainController extends TelegramLongPollingBot {
                         || text.startsWith("https://www.linkedin.com/")
                         || text.startsWith("https://snapchat.com/")
                 ) {
-                    List<CodeMessage> mediaFromDB = findMediaFromDBService.getMediaFromDB(text, chatId);
+                    List<CodeMessage> mediaFromDB = findMediaFromDBService.getMediaFromDB(text, chatId, botConfig.getChannel());
                     if (mediaFromDB != null) {
                         sendMsg(mediaFromDB);
                     } else {
@@ -103,7 +103,7 @@ public class MainController extends TelegramLongPollingBot {
     @SneakyThrows
     private Integer forwardMessage(Long fromChatId, Integer messageId) {
         ForwardMessage forwardMessage = new ForwardMessage();
-        forwardMessage.setChatId("@" + botConfig.getChannelId());
+        forwardMessage.setChatId("@" + botConfig.getChannel());
         forwardMessage.setFromChatId(fromChatId);
         forwardMessage.setMessageId(messageId);
         Message execute = execute(forwardMessage);
