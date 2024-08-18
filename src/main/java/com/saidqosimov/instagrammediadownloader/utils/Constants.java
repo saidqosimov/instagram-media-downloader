@@ -48,7 +48,7 @@ public interface Constants {
     String TERMS_OF_USE_URL = "https://t.me/Instagram_Youtube_TikTok_Video";
     String START = "/start";
     String HELP = "/help";
-    String[] HELP_GUIDE = {"· Instagram / Instagram Stories, Highlights\n" +
+    String[] HELP_GUIDE = {"· Instagram / Instagram Stories\n" +
             "· TikTok\n" +
             "· Youtube (shorts)\n" +
             "· Facebook\n" +
@@ -61,7 +61,9 @@ public interface Constants {
             "\n" +
             "Namuna :\n" +
             "https://www.instagram.com/p/Bve8C_FAg1Q/\n\n" +
-            "• Tilni o'zgartirish /lang","· Instagram / Instagram Stories, Highlights\n" +
+            "• Tilni o'zgartirish /lang",
+
+            "· Instagram / Instagram Stories\n" +
             "· TikTok\n" +
             "· Youtube (shorts)\n" +
             "· Facebook\n" +
@@ -76,7 +78,7 @@ public interface Constants {
             "https://www.instagram.com/p/Bve8C_FAg1Q/\n" +
             "\n" +
             "• Change language /lang",
-            "· Instagram / Instagram Stories, Highlights\n" +
+            "· Instagram / Instagram Stories\n" +
             "· TikTok\n" +
             "· Youtube (shorts)\n" +
             "· Фейсбук\n" +
@@ -126,7 +128,7 @@ public interface Constants {
     String[] COMMAND_NOT_FOUND = {"⚠\uFE0F Ma'lumot topilmadi", "⚠\uFE0F Information not found", "⚠\uFE0F Информация не найдена"};
     String CAPTION = "⬇\uFE0F @Media_LoaderBot";
     String[] USERNAME_ERROR = {"⚠\uFE0F Username mavjud emas", "⚠\uFE0F Username does not exist", "⚠\uFE0FИмя пользователя не существует."};
-    String[] STORIES_NOT_FOUND = {"Ayni damda ushbu akauntda storieslar mavjud emas", "There are currently no stories on this account", "На данный момент в этом аккаунте нет историй"};
+    String[] STORIES_NOT_FOUND = {"⚠️ Stories topilmadi", "⚠️ No stories found", "⚠️ Истории не найдены"};
     String[] CHOOSE_LANG = {"\uD83C\uDF0D Kerakli tilni tanlang", "\uD83C\uDF0D Choose a language", "\uD83C\uDF0D Выберите язык"};
     String LANG = "/lang";
 }

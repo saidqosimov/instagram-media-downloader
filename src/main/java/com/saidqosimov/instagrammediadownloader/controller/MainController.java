@@ -3,19 +3,19 @@ package com.saidqosimov.instagrammediadownloader.controller;
 import com.saidqosimov.instagrammediadownloader.config.BotConfig;
 import com.saidqosimov.instagrammediadownloader.entity.TelegramUsers;
 import com.saidqosimov.instagrammediadownloader.enums.Language;
+import com.saidqosimov.instagrammediadownloader.enums.PostType;
 import com.saidqosimov.instagrammediadownloader.model.CodeMessage;
+import com.saidqosimov.instagrammediadownloader.service.FindMediaFromDBService;
 import com.saidqosimov.instagrammediadownloader.service.TelegramUsersService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
-import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
-import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.IOException;
@@ -31,6 +31,7 @@ import java.util.concurrent.Executors;
 public class MainController extends TelegramLongPollingBot {
     private final BotConfig botConfig;
     private final TelegramUsersService telegramUsersService;
+    private final FindMediaFromDBService findMediaFromDBService;
     private final GeneralController generalController;
     private final ExecutorService executorService = Executors.newFixedThreadPool(20); // 20 ta iplar soni
 
@@ -70,9 +71,20 @@ public class MainController extends TelegramLongPollingBot {
                         || text.startsWith("https://www.linkedin.com/")
                         || text.startsWith("https://snapchat.com/")
                 ) {
-                    Integer processMessageId = inProcess(chatId);
-                    sendMsg(generalController.handle(message, langId));
-                    deleteProcess(chatId, processMessageId);
+                    List<CodeMessage> mediaFromDB = findMediaFromDBService.getMediaFromDB(text, chatId);
+                    if (mediaFromDB != null) {
+                        sendMsg(mediaFromDB);
+                    } else {
+                        Integer processMessageId = inProcess(chatId);
+                        try {
+                            sendMsg(generalController.handle(message, langId));
+                            deleteProcess(chatId, processMessageId);
+                        } catch (Exception e) {
+                            deleteProcess(chatId, processMessageId);
+                        }
+
+                    }
+
                 } else {
                     sendMsg(generalController.handle(message, langId));
                 }
@@ -85,8 +97,18 @@ public class MainController extends TelegramLongPollingBot {
                 sendMsg(generalController.handle(callbackQuery));
             }
         }
+
     }
 
+    @SneakyThrows
+    private Integer forwardMessage(Long fromChatId, Integer messageId) {
+        ForwardMessage forwardMessage = new ForwardMessage();
+        forwardMessage.setChatId("@" + botConfig.getChannelId());
+        forwardMessage.setFromChatId(fromChatId);
+        forwardMessage.setMessageId(messageId);
+        Message execute = execute(forwardMessage);
+        return execute.getMessageId();
+    }
 
     @SneakyThrows
     private synchronized Integer inProcess(Long chatId) {
@@ -135,7 +157,11 @@ public class MainController extends TelegramLongPollingBot {
                 }
                 case SEND_PHOTO -> {
                     try {
-                        execute(message.getSendPhoto());
+                        Message execute = execute(message.getSendPhoto());
+                        if (message.getMediaUrl() != null) {
+                            Integer i = forwardMessage(Long.valueOf(message.getSendPhoto().getChatId()), execute.getMessageId());
+                            findMediaFromDBService.addMediaData(message.getMediaUrl(), i, PostType.PHOTO);
+                        }
                     } catch (TelegramApiException e) {
                         throw new RuntimeException(e);
                     }
@@ -143,11 +169,15 @@ public class MainController extends TelegramLongPollingBot {
                 }
                 case SEND_VIDEO -> {
                     try {
-                        execute(message.getSendVideo());
+                        Message execute = execute(message.getSendVideo());
+                        if (message.getMediaUrl() != null) {
+                            Integer i = forwardMessage(execute.getChatId(), execute.getMessageId());
+                            findMediaFromDBService.addMediaData(message.getMediaUrl(), i, PostType.VIDEO);
+                        }
                     } catch (Exception e) {
                         URL url = null;
                         try {
-                            url = new URL(message.getUrl());
+                            url = new URL(message.getDownloadUrl());
                         } catch (MalformedURLException ex) {
                             throw new RuntimeException(ex);
                         }
@@ -163,11 +193,20 @@ public class MainController extends TelegramLongPollingBot {
                         sendVideo.setCaption("⬇\uFE0F @Media_LoaderBot");
                         sendVideo.setVideo(inputFile);
                         try {
-                            execute(sendVideo);
+                            Message execute = execute(sendVideo);
+/*                            GetFile getFileRequest = new GetFile(execute.getVideo().getFileId());
+                            File file = execute(getFileRequest);
+                            String fileUrl = "https://api.telegram.org/file/bot" + botConfig.getToken() + "/" + file.getFilePath();
+                            System.out.println(fileUrl);*/
+                            if (message.getMediaUrl() != null) {
+                                Integer i = forwardMessage(execute.getChatId(), execute.getMessageId());
+                                findMediaFromDBService.addMediaData(message.getMediaUrl(), i, PostType.VIDEO);
+                            }
+
                         } catch (Exception ex) {
                             SendMessage sendMessage = SendMessage
                                     .builder()
-                                    .text(message.getUrl())
+                                    .text(message.getDownloadUrl())
                                     .chatId(message.getSendVideo().getChatId())
                                     .build();
                             try {

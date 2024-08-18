@@ -22,5 +22,6 @@ public class CodeMessage {
     private DeleteMessage deleteMessage;
     private SendPhoto sendPhoto;
     private SendVideo sendVideo;
-    private String url;
+    private String downloadUrl;
+    private String mediaUrl;
 }

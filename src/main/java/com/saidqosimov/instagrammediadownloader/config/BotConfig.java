@@ -15,6 +15,8 @@ public class BotConfig {
     String token;
     @Value("${bot.admin}")
     Long admin;
+    @Value("${bot.channel}")
+    String channelId;
 
     @Bean
     public RestTemplate restTemplate() {

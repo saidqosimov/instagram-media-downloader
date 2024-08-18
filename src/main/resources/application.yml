@@ -1,11 +1,13 @@
 bot.name:
-  #Media_LoaderBot
-  FuckingInstagramBot
+  Media_LoaderBot
+  #FuckingInstagramBot
 bot.token:
-  #6903502818:AAGLwO_cDYtWS8fyiiV5Un3F17iKVhHKGnM
-  6756997887:AAHCoenpEhbjYwMC_LUOyD43hrlI9Uzx0oA
+  6903502818:AAGLwO_cDYtWS8fyiiV5Un3F17iKVhHKGnM
+  #6756997887:AAHCoenpEhbjYwMC_LUOyD43hrlI9Uzx0oA
 bot.admin:
   5540407547
+bot.channel:
+  c38ncy7tx389to8rcn946ncq76cn9wcr
 
 spring:
   datasource:

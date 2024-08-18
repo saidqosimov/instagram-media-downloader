@@ -47,28 +47,28 @@ public class UniversalService {
         } else if (requestUrl.containsKey(ServiceType.PUBLER)) {
             List<Map<PostType, String>> publerMedia = publerService.getMediaData(requestUrl.get(ServiceType.PUBLER));
             if (publerMedia != null) {
-                return getCodeMessages(chatId, codeMessageList, publerMedia);
+                return getCodeMessages(chatId, codeMessageList, publerMedia, mediaUrl);
             }
         } else if (requestUrl.containsKey(ServiceType.INSTAGRAM)) {
             System.out.println(requestUrl.get(ServiceType.INSTAGRAM));
             List<Map<PostType, String>> instagramMedia = instagramService.getInstagramMedia(requestUrl.get(ServiceType.INSTAGRAM));
             if (instagramMedia != null) {
-                return getCodeMessages(chatId, codeMessageList, instagramMedia);
+                return getCodeMessages(chatId, codeMessageList, instagramMedia, mediaUrl);
             }
         } else if (requestUrl.containsKey(ServiceType.YOUTUBE)) {
             Map<PostType, String> youtubeMedia = youtubeService.getYoutubeMedia(requestUrl.get(ServiceType.YOUTUBE));
             if (youtubeMedia != null) {
-                return getCodeMessage(chatId, codeMessageList, youtubeMedia);
+                return getCodeMessage(chatId, codeMessageList, youtubeMedia, mediaUrl);
             }
         } else if (requestUrl.containsKey(ServiceType.FACEBOOK)) {
             Map<PostType, String> fbMedia = facebookService.getFbMedia(requestUrl.get(ServiceType.FACEBOOK));
             if (fbMedia != null) {
-                return getCodeMessage(chatId, codeMessageList, fbMedia);
+                return getCodeMessage(chatId, codeMessageList, fbMedia, mediaUrl);
             }
         } else if (requestUrl.containsKey(ServiceType.GET_IN_DEVICE)) {
             List<Map<PostType, String>> getInDeviceMedia = getInDeviceService.getInDeviceMedia(requestUrl.get(ServiceType.GET_IN_DEVICE));
             if (getInDeviceMedia != null) {
-                return getCodeMessages(chatId, codeMessageList, getInDeviceMedia);
+                return getCodeMessages(chatId, codeMessageList, getInDeviceMedia, mediaUrl);
             }
         } else if (requestUrl.containsKey(ServiceType.STORIES)) {
             List<Map<PostType, String>> stories = storiesService.getStories(requestUrl.get(ServiceType.STORIES));
@@ -78,12 +78,13 @@ public class UniversalService {
                 codeMessage.setMessageType(MessageType.SEND_MESSAGE);
                 SendMessage sendMessage = SendMessage.builder()
                         .chatId(chatId)
-                        .text(Constants.USERNAME_ERROR[langId])
+                        .text(Constants.STORIES_NOT_FOUND[langId])
+                        //.text(Constants.USERNAME_ERROR[langId])
                         .build();
                 codeMessage.setSendMessage(sendMessage);
                 codeMessageList.add(codeMessage);
                 return codeMessageList;
-            } else if (stories.isEmpty()) {
+            } /*else if (stories.isEmpty()) {
                 CodeMessage codeMessage = new CodeMessage();
                 codeMessage.setMessageType(MessageType.SEND_MESSAGE);
                 SendMessage sendMessage = SendMessage.builder()
@@ -93,8 +94,8 @@ public class UniversalService {
                 codeMessage.setSendMessage(sendMessage);
                 codeMessageList.add(codeMessage);
                 return codeMessageList;
-            }
-            return getCodeMessages(chatId, codeMessageList, stories);
+            }*/
+            return getCodeMessages(chatId, codeMessageList, stories, mediaUrl);
         }
         CodeMessage codeMessage = new CodeMessage();
         codeMessage.setMessageType(MessageType.SEND_MESSAGE);
@@ -107,7 +108,7 @@ public class UniversalService {
         return codeMessageList;
     }
 
-    private List<CodeMessage> getCodeMessage(Long chatId, List<CodeMessage> codeMessageList, Map<PostType, String> videoData) {
+    private List<CodeMessage> getCodeMessage(Long chatId, List<CodeMessage> codeMessageList, Map<PostType, String> videoData, String mediaUrl) {
         CodeMessage codeMessage = CodeMessage.builder()
                 .messageType(MessageType.SEND_VIDEO)
                 .sendVideo(SendVideo.builder()
@@ -115,13 +116,14 @@ public class UniversalService {
                         .caption(Constants.CAPTION)
                         .chatId(chatId)
                         .build())
-                .url(videoData.get(PostType.VIDEO))
+                .downloadUrl(videoData.get(PostType.VIDEO))
+                .mediaUrl(mediaUrl)
                 .build();
         codeMessageList.add(codeMessage);
         return codeMessageList;
     }
 
-    private List<CodeMessage> getCodeMessages(Long chatId, List<CodeMessage> codeMessageList, List<Map<PostType, String>> postData) {
+    private List<CodeMessage> getCodeMessages(Long chatId, List<CodeMessage> codeMessageList, List<Map<PostType, String>> postData, String mediaUrl) {
         for (Map<PostType, String> map : postData) {
             if (map.containsKey(PostType.VIDEO)) {
                 CodeMessage codeMessage = CodeMessage.builder()
@@ -131,7 +133,8 @@ public class UniversalService {
                                 .caption(Constants.CAPTION)
                                 .chatId(chatId)
                                 .build())
-                        .url(map.get(PostType.VIDEO))
+                        .downloadUrl(map.get(PostType.VIDEO))
+                        .mediaUrl(mediaUrl)
                         .build();
                 codeMessageList.add(codeMessage);
             } else if (map.containsKey(PostType.PHOTO)) {
@@ -142,7 +145,8 @@ public class UniversalService {
                                 .caption(Constants.CAPTION)
                                 .chatId(chatId)
                                 .build())
-                        .url(map.get(PostType.VIDEO))
+                        .downloadUrl(map.get(PostType.PHOTO))
+                        .mediaUrl(mediaUrl)
                         .build();
                 codeMessageList.add(codeMessage);
             }
@@ -152,8 +156,8 @@ public class UniversalService {
 
     private Map<ServiceType, String> getRequestUrl(String mediaUrl) {
         Map<ServiceType, String> map = new HashMap<>();
-        String baseUrl = "http://ec2-3-64-130-245.eu-central-1.compute.amazonaws.com:8085/api/";
-        //String baseUrl = "http://localhost:8085/api/";
+        //String baseUrl = "http://ec2-3-64-130-245.eu-central-1.compute.amazonaws.com:8085/api/";
+        String baseUrl = "http://localhost:8085/api/";
 
         if (
                 mediaUrl.startsWith("https://www.tiktok.com/")
@@ -162,7 +166,6 @@ public class UniversalService {
                         || mediaUrl.startsWith("https://www.instagram.com/reel")
                         || mediaUrl.startsWith("https://www.instagram.com/reels")
                         || mediaUrl.startsWith("https://www.instagram.com/p")
-                        || mediaUrl.startsWith("https://x.com/")
                         || mediaUrl.startsWith("https://www.linkedin.com/")
         ) {
             map.put(ServiceType.PUBLER, baseUrl.concat("publerio-downloader/param?url=").concat(mediaUrl));
@@ -170,14 +173,14 @@ public class UniversalService {
         } else if (mediaUrl.startsWith("https://www.instagram.com/stories/highlights/")) {
             map.put(ServiceType.STORIES, baseUrl.concat("instagram-highlights-downloader/param?url=").concat(mediaUrl));
             return map;
-        }else if (mediaUrl.startsWith("https://www.instagram.com/stories/")) {
-            String[] parts = mediaUrl.split("/");
-            map.put(ServiceType.STORIES, baseUrl.concat("instagram-user-stories-downloader/param?username=").concat(parts[4]));
+        } else if (mediaUrl.startsWith("https://www.instagram.com/stories/")) {
+            map.put(ServiceType.STORIES, baseUrl.concat("instagram-stories-downloader/param?url=").concat(mediaUrl));
             return map;
         } else if (
                 mediaUrl.startsWith("https://www.pinterest.com/")
                         || mediaUrl.startsWith("https://pin.it/")
                         || mediaUrl.startsWith("https://snapchat.com/")
+                        || mediaUrl.startsWith("https://x.com/")
         ) {
             map.put(ServiceType.GET_IN_DEVICE, baseUrl.concat("getindevice-downloader/param?url=").concat(mediaUrl));
             return map;
