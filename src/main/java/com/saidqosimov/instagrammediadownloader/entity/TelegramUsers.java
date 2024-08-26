@@ -2,6 +2,7 @@ package com.saidqosimov.instagrammediadownloader.entity;
 
 import com.saidqosimov.instagrammediadownloader.enums.Language;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,7 +23,8 @@ public class TelegramUsers implements Serializable {
     @Column(unique = true)
     private Long chatId;
     private String firstName;
-    @Enumerated
     private Language lang;
+    @Size(max = 32)
     private String username;
+    private boolean enabled = true;
 }

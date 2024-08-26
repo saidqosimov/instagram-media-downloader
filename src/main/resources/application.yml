@@ -1,9 +1,7 @@
 bot.name:
   Media_LoaderBot
-  #FuckingInstagramBot
 bot.token:
   6903502818:AAGLwO_cDYtWS8fyiiV5Un3F17iKVhHKGnM
-  #6756997887:AAHCoenpEhbjYwMC_LUOyD43hrlI9Uzx0oA
 bot.admin:
   5540407547
 bot.channel:
@@ -12,10 +10,10 @@ bot.channel:
 spring:
   datasource:
     #url: jdbc:postgresql://localhost:5432/postgres
-    url: jdbc:postgresql://monorail.proxy.rlwy.net:39850/railway
     #username: postgres
-    username: postgres
     #password: 1
+    url: jdbc:postgresql://monorail.proxy.rlwy.net:39850/railway
+    username: postgres
     password: kHHMEOcqeelVDLzGZGEYKaqnycgyBACa
     driver-class-name: org.postgresql.Driver
   jpa:
@@ -29,8 +27,4 @@ spring:
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 server:
-  port: 8081
-
-  #    url: jdbc:postgresql://roundhouse.proxy.rlwy.net:22744/railway
-  #    username: postgres
-  #    password: f41C5E1ga3cCecacAgDBBdbB1fcD2a4A
+  port: 8080

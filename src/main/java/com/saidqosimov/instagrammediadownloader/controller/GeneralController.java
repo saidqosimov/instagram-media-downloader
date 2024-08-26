@@ -1,5 +1,6 @@
 package com.saidqosimov.instagrammediadownloader.controller;
 
+import com.saidqosimov.instagrammediadownloader.config.BotConfig;
 import com.saidqosimov.instagrammediadownloader.enums.Language;
 import com.saidqosimov.instagrammediadownloader.enums.MessageType;
 import com.saidqosimov.instagrammediadownloader.model.CodeMessage;
@@ -7,46 +8,32 @@ import com.saidqosimov.instagrammediadownloader.service.TelegramUsersService;
 import com.saidqosimov.instagrammediadownloader.service.UniversalService;
 import com.saidqosimov.instagrammediadownloader.utils.Constants;
 import com.saidqosimov.instagrammediadownloader.utils.MainKeyboards;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 
 import java.util.LinkedList;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class GeneralController {
     private final MainKeyboards mainKeyboards;
     private final UniversalService universalService;
     private final TelegramUsersService telegramUsersService;
-
-    public GeneralController(MainKeyboards mainKeyboards, UniversalService universalService, TelegramUsersService telegramUsersService) {
-        this.mainKeyboards = mainKeyboards;
-        this.universalService = universalService;
-        this.telegramUsersService = telegramUsersService;
-    }
+    private final BotConfig botConfig;
 
     public List<CodeMessage> handle(Message message, int langId) {
         List<CodeMessage> response = new LinkedList<>();
         Long chatId = message.getChatId();
-        CodeMessage codeMessage;
         if (message.hasText()) {
             String text = message.getText();
             if (text.equals(Constants.START)) {
-                SendMessage sendMessage = SendMessage
-                        .builder()
-                        .text(Constants.START_GUIDE[langId])
-                        .replyMarkup(mainKeyboards.getGuideButton(langId))
-                        .chatId(chatId)
-                        .build();
-                codeMessage = CodeMessage
-                        .builder()
-                        .messageType(MessageType.SEND_MESSAGE)
-                        .sendMessage(sendMessage)
-                        .build();
-                response.add(codeMessage);
+                response.add(getCodeMessage(Constants.START_GUIDE[langId], chatId, mainKeyboards.getGuideButton(langId)));
                 return response;
             } else if (text.startsWith("https://")) {
                 List<CodeMessage> urlData = universalService.getMediaData(message, langId);
@@ -54,48 +41,53 @@ public class GeneralController {
                     return urlData;
                 }
             } else if (text.equals(Constants.HELP)) {
-                SendMessage sendMessage = SendMessage
-                        .builder()
-                        .text(Constants.HELP_GUIDE[langId])
-                        .chatId(chatId)
-                        .build();
-                codeMessage = CodeMessage
-                        .builder()
-                        .messageType(MessageType.SEND_MESSAGE)
-                        .sendMessage(sendMessage)
-                        .build();
-                response.add(codeMessage);
+                response.add(getCodeMessage(Constants.HELP_GUIDE[langId], chatId, null));
                 return response;
             } else if (text.equals(Constants.LANG)) {
-                SendMessage sendMessage = SendMessage
-                        .builder()
-                        .text(Constants.CHOOSE_LANG[langId])
-                        .replyMarkup(mainKeyboards.getLanguageButton())
-                        .chatId(chatId)
-                        .build();
-                codeMessage = CodeMessage
-                        .builder()
-                        .messageType(MessageType.SEND_MESSAGE)
-                        .sendMessage(sendMessage)
-                        .build();
-                response.add(codeMessage);
+                response.add(getCodeMessage(Constants.CHOOSE_LANG[langId], chatId, mainKeyboards.getLanguageButton()));
+                return response;
+            } else if (text.startsWith("/block ") && chatId.equals(botConfig.getAdmin())) {
+                String s = text.split(" ")[1];
+                if (!s.equals(botConfig.getAdmin().toString())) {
+                    try {
+                        response.add(getCodeMessage("Bloklandi", chatId, null));
+                        telegramUsersService.blockUser(Long.parseLong(s));
+                    } catch (Exception e) {
+                        response.add(getCodeMessage("Xatolik", chatId, null));
+                    }
+                }
+                return response;
+            } else if (text.startsWith("/unblock ") && chatId.equals(botConfig.getAdmin())) {
+                String s = text.split(" ")[1];
+                try {
+                    response.add(getCodeMessage("Blokdan chiqarildi", chatId, null));
+                    telegramUsersService.unblockUser(Long.parseLong(s));
+                } catch (Exception e) {
+                    response.add(getCodeMessage("Xatolik", chatId, null));
+                }
                 return response;
             } else {
-                SendMessage sendMessage = SendMessage
-                        .builder()
-                        .text(Constants.COMMAND_NOT_FOUND[langId])
-                        .chatId(chatId)
-                        .build();
-                codeMessage = CodeMessage
-                        .builder()
-                        .messageType(MessageType.SEND_MESSAGE)
-                        .sendMessage(sendMessage)
-                        .build();
-                response.add(codeMessage);
+                response.add(getCodeMessage(Constants.COMMAND_NOT_FOUND[langId], chatId, null));
                 return response;
             }
         }
         return null;
+    }
+
+    protected CodeMessage getCodeMessage(String text, Long chatId, ReplyKeyboard replyKeyboard) {
+        SendMessage sendMessage = SendMessage
+                .builder()
+                .text(text)
+                .chatId(chatId)
+                .build();
+        if (replyKeyboard != null) {
+            sendMessage.setReplyMarkup(replyKeyboard);
+        }
+        return CodeMessage
+                .builder()
+                .messageType(MessageType.SEND_MESSAGE)
+                .sendMessage(sendMessage)
+                .build();
     }
 
     public List<CodeMessage> handle(CallbackQuery callbackQuery) {

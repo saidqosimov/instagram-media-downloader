@@ -7,6 +7,7 @@ import com.saidqosimov.instagrammediadownloader.enums.PostType;
 import com.saidqosimov.instagrammediadownloader.model.CodeMessage;
 import com.saidqosimov.instagrammediadownloader.service.FindMediaFromDBService;
 import com.saidqosimov.instagrammediadownloader.service.TelegramUsersService;
+import com.saidqosimov.instagrammediadownloader.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Component;
@@ -55,6 +56,10 @@ public class MainController extends TelegramLongPollingBot {
                     case en -> 1;
                     case ru -> 2;
                 };
+                if (!telegramUser.isEnabled()) {
+                    sendMsg(Constants.IS_BLOCKED[langId], chatId);
+                    return;
+                }
                 String text = message.getText();
                 if (text.startsWith("https://www.instagram.com/")
                         || text.startsWith("https://www.youtube.com/")
@@ -62,6 +67,7 @@ public class MainController extends TelegramLongPollingBot {
                         || text.startsWith("https://www.tiktok.com/")
                         || text.startsWith("https://vt.tiktok.com/")
                         || text.startsWith("https://vm.tiktok.com/")
+                        || text.startsWith("https://m.tiktok.com/")
                         || text.startsWith("https://youtu.be/")
                         || text.startsWith("https://fb.watch/")
                         || text.startsWith("https://www.facebook.com/")
@@ -102,11 +108,18 @@ public class MainController extends TelegramLongPollingBot {
 
     @SneakyThrows
     private Integer forwardMessage(Long fromChatId, Integer messageId) {
-        ForwardMessage forwardMessage = new ForwardMessage();
-        forwardMessage.setChatId("@" + botConfig.getChannel());
-        forwardMessage.setFromChatId(fromChatId);
-        forwardMessage.setMessageId(messageId);
+        ForwardMessage forwardMessage = ForwardMessage.builder()
+                .chatId("@" + botConfig.getChannel())
+                .messageId(messageId)
+                .fromChatId(fromChatId)
+                .build();
         Message execute = execute(forwardMessage);
+        SendMessage sendMessage = SendMessage.builder()
+                .chatId("@" + botConfig.getChannel())
+                .replyToMessageId(execute.getMessageId())
+                .text(fromChatId.toString())
+                .build();
+        execute(sendMessage);
         return execute.getMessageId();
     }
 
@@ -117,6 +130,15 @@ public class MainController extends TelegramLongPollingBot {
                 .text("🔎")
                 .build();
         return execute(sendMessage).getMessageId();
+    }
+
+    @SneakyThrows
+    private synchronized void sendMsg(String text, Long chatId) {
+        SendMessage sendMessage = SendMessage.builder()
+                .chatId(chatId)
+                .text(text)
+                .build();
+        execute(sendMessage);
     }
 
     @SneakyThrows

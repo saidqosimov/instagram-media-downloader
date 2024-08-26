@@ -30,6 +30,13 @@ public class TelegramUsersService {
         telegramUsers.setLang(language);
         telegramUsersRepository.save(telegramUsers);
     }
+
+    public synchronized void blockUser(Long chatId) {
+        TelegramUsers telegramUsers = telegramUsersRepository.getTelegramUsersByChatId(chatId);
+        telegramUsers.setEnabled(false);
+        telegramUsersRepository.save(telegramUsers);
+    }
+
     public synchronized List<TelegramUsers> getAllTelegramUsers() {
         return telegramUsersRepository.getAllTelegramUser();
     }
@@ -46,10 +53,15 @@ public class TelegramUsersService {
                 .firstName(message.getFrom().getFirstName())
                 .username(message.getFrom().getUserName())
                 .lang(language)
-                //.refCount(0)
-                //.refLink(Base64.getEncoder().encodeToString(message.getChatId().toString().getBytes(StandardCharsets.UTF_8)))
+                .enabled(true)
                 .build();
         System.out.println(telegramBotUsers);
         telegramUsersRepository.save(telegramBotUsers);
+    }
+
+    public void unblockUser(long chatId) {
+        TelegramUsers telegramUsers = telegramUsersRepository.getTelegramUsersByChatId(chatId);
+        telegramUsers.setEnabled(true);
+        telegramUsersRepository.save(telegramUsers);
     }
 }
