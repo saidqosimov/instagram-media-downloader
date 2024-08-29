@@ -19,7 +19,7 @@ public class YoutubeService {
     public YoutubeService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
-    public Map<PostType, String> getYoutubeMedia(String mediaUrl) {
+    public synchronized Map<PostType, String> getYoutubeMedia(String mediaUrl) {
         Map<PostType, String> map = new HashMap<>();
         String result = restTemplate.getForObject(mediaUrl, String.class);
         JsonObject jsonObject = JsonParser.parseString(result).getAsJsonObject();

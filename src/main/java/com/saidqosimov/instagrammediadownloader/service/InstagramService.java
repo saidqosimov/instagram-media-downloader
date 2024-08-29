@@ -18,7 +18,7 @@ public class InstagramService {
         this.restTemplate = restTemplate;
     }
 
-    public List<Map<PostType, String>> getInstagramMedia(String mediaUrl) {
+    public synchronized List<Map<PostType, String>> getInstagramMedia(String mediaUrl) {
         List<Map<PostType, String>> mapList = new LinkedList<>();
         try {
             String result = restTemplate.getForObject(mediaUrl, String.class);

@@ -19,7 +19,7 @@ public class StoriesService {
         this.restTemplate = restTemplate;
     }
 
-    public List<Map<PostType, String>> getStories(String mediaUrl) {
+    public synchronized List<Map<PostType, String>> getStories(String mediaUrl) {
         List<Map<PostType, String>> mapList = new LinkedList<>();
         try {
             String result = restTemplate.getForObject(mediaUrl, String.class);

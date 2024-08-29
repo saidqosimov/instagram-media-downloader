@@ -21,7 +21,7 @@ import java.util.List;
 public class FindMediaFromDBService {
     private final MediaDataRepository mediaDataRepository;
 
-    public void addMediaData(String mediaUrl, Integer messageId, PostType postType) {
+    public synchronized void addMediaData(String mediaUrl, Integer messageId, PostType postType) {
         if (mediaUrl.startsWith("https://www.instagram.com/p/") || mediaUrl.startsWith("https://www.instagram.com/reels/") || mediaUrl.startsWith("https://www.instagram.com/reel/")) {
             mediaUrl = "https://www.instagram.com/p/" + mediaUrl.split("/")[4];
         }
@@ -32,7 +32,7 @@ public class FindMediaFromDBService {
         mediaDataRepository.save(mediaDataEntity);
     }
 
-    public List<CodeMessage> getMediaFromDB(String mediaUrl, Long chatId, String channelId) {
+    public synchronized List<CodeMessage> getMediaFromDB(String mediaUrl, Long chatId, String channelId) {
         if (mediaUrl.startsWith("https://www.instagram.com/p/") || mediaUrl.startsWith("https://www.instagram.com/reels/") || mediaUrl.startsWith("https://www.instagram.com/reel/")) {
             mediaUrl = "https://www.instagram.com/p/" + mediaUrl.split("/")[4];
         }

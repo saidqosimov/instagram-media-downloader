@@ -16,7 +16,7 @@ import java.util.*;
 public class GetInDeviceService {
     private final RestTemplate restTemplate;
 
-    public List<Map<PostType, String>> getInDeviceMedia(String mediaUrl) {
+    public synchronized List<Map<PostType, String>> getInDeviceMedia(String mediaUrl) {
         try {
             List<Map<PostType, String>> mapList = new LinkedList<>();
             String result = restTemplate.getForObject(mediaUrl, String.class);

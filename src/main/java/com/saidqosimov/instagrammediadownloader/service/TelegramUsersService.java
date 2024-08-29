@@ -59,7 +59,7 @@ public class TelegramUsersService {
         telegramUsersRepository.save(telegramBotUsers);
     }
 
-    public void unblockUser(long chatId) {
+    public synchronized void unblockUser(long chatId) {
         TelegramUsers telegramUsers = telegramUsersRepository.getTelegramUsersByChatId(chatId);
         telegramUsers.setEnabled(true);
         telegramUsersRepository.save(telegramUsers);

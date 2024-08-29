@@ -28,7 +28,7 @@ public class UniversalService {
     private final FacebookService facebookService;
     private final PublerService publerService;
 
-    public List<CodeMessage> getMediaData(Message message, int langId) {
+    public synchronized List<CodeMessage> getMediaData(Message message, int langId) {
         String mediaUrl = message.getText();
         System.out.println(mediaUrl);
         Long chatId = message.getChatId();
@@ -108,7 +108,7 @@ public class UniversalService {
         return codeMessageList;
     }
 
-    private List<CodeMessage> getCodeMessage(Long chatId, List<CodeMessage> codeMessageList, Map<PostType, String> videoData, String mediaUrl) {
+    private synchronized List<CodeMessage> getCodeMessage(Long chatId, List<CodeMessage> codeMessageList, Map<PostType, String> videoData, String mediaUrl) {
         CodeMessage codeMessage = CodeMessage.builder()
                 .messageType(MessageType.SEND_VIDEO)
                 .sendVideo(SendVideo.builder()
@@ -123,7 +123,7 @@ public class UniversalService {
         return codeMessageList;
     }
 
-    private List<CodeMessage> getCodeMessages(Long chatId, List<CodeMessage> codeMessageList, List<Map<PostType, String>> postData, String mediaUrl) {
+    private synchronized List<CodeMessage> getCodeMessages(Long chatId, List<CodeMessage> codeMessageList, List<Map<PostType, String>> postData, String mediaUrl) {
         for (Map<PostType, String> map : postData) {
             if (map.containsKey(PostType.VIDEO)) {
                 CodeMessage codeMessage = CodeMessage.builder()
@@ -154,7 +154,7 @@ public class UniversalService {
         return codeMessageList;
     }
 
-    private Map<ServiceType, String> getRequestUrl(String mediaUrl) {
+    private synchronized Map<ServiceType, String> getRequestUrl(String mediaUrl) {
         Map<ServiceType, String> map = new HashMap<>();
         String baseUrl = "http://ec2-3-64-130-245.eu-central-1.compute.amazonaws.com:8085/api/";
         //String baseUrl = "http://localhost:8085/api/";

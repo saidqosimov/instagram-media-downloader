@@ -15,7 +15,7 @@ import java.util.*;
 public class PublerService {
     private final RestTemplate restTemplate;
 
-    public List<Map<PostType, String>> getMediaData(String mediaUrl) {
+    public synchronized List<Map<PostType, String>> getMediaData(String mediaUrl) {
         List<Map<PostType, String>> mapList = new LinkedList<>();
         String result = restTemplate.getForObject(mediaUrl, String.class);
         JsonObject jsonObject = JsonParser.parseString(Objects.requireNonNull(result)).getAsJsonObject();

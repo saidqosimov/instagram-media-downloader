@@ -20,7 +20,7 @@ public class FacebookService {
         this.restTemplate = restTemplate;
     }
 
-    public Map<PostType, String> getFbMedia(String mediaUrl) {
+    public synchronized Map<PostType, String> getFbMedia(String mediaUrl) {
         try {
             Map<PostType, String> map = new HashMap<>();
             String result = restTemplate.getForObject(mediaUrl, String.class);
