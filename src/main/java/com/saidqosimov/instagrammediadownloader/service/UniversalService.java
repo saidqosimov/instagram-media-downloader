@@ -156,16 +156,17 @@ public class UniversalService {
 
     private synchronized Map<ServiceType, String> getRequestUrl(String mediaUrl) {
         Map<ServiceType, String> map = new HashMap<>();
-        String baseUrl = "http://ec2-3-64-130-245.eu-central-1.compute.amazonaws.com:8085/api/";
+        String baseUrl = "rest-instagram-production.up.railway.app/";
+        //String baseUrl = "http://ec2-3-64-130-245.eu-central-1.compute.amazonaws.com:8085/api/";
         //String baseUrl = "http://localhost:8085/api/";
 
         if (
                 mediaUrl.startsWith("https://www.tiktok.com/")
                         || mediaUrl.startsWith("https://vt.tiktok.com/")
                         || mediaUrl.startsWith("https://vm.tiktok.com/")
-                        || mediaUrl.startsWith("https://www.instagram.com/reel")
+/*                        || mediaUrl.startsWith("https://www.instagram.com/reel")
                         || mediaUrl.startsWith("https://www.instagram.com/reels")
-                        || mediaUrl.startsWith("https://www.instagram.com/p")
+                        || mediaUrl.startsWith("https://www.instagram.com/p")*/
                         || mediaUrl.startsWith("https://www.linkedin.com/")
         ) {
             map.put(ServiceType.PUBLER, baseUrl.concat("publerio-downloader/param?url=").concat(mediaUrl));
