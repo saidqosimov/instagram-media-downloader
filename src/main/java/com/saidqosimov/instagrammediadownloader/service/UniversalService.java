@@ -156,7 +156,7 @@ public class UniversalService {
 
     private synchronized Map<ServiceType, String> getRequestUrl(String mediaUrl) {
         Map<ServiceType, String> map = new HashMap<>();
-        String baseUrl = "https://rest-instagram-production.up.railway.app/";
+        String baseUrl = "https://rest-instagram-production.up.railway.app/api/";
         //String baseUrl = "http://ec2-3-64-130-245.eu-central-1.compute.amazonaws.com:8085/api/";
         //String baseUrl = "http://localhost:8085/api/";
 
