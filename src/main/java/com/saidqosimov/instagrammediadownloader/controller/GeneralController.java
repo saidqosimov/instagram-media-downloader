@@ -27,7 +27,7 @@ public class GeneralController {
     private final TelegramUsersService telegramUsersService;
     private final BotConfig botConfig;
 
-    public List<CodeMessage> handle(Message message, int langId) {
+    public synchronized List<CodeMessage> handle(Message message, int langId) {
         List<CodeMessage> response = new LinkedList<>();
         Long chatId = message.getChatId();
         if (message.hasText()) {
@@ -90,7 +90,7 @@ public class GeneralController {
                 .build();
     }
 
-    public List<CodeMessage> handle(CallbackQuery callbackQuery) {
+    public synchronized List<CodeMessage> handle(CallbackQuery callbackQuery) {
         String data = callbackQuery.getData();
         System.out.println(data);
         Long chatId = callbackQuery.getFrom().getId();

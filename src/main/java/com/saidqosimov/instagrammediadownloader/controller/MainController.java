@@ -77,10 +77,10 @@ public class MainController extends TelegramLongPollingBot {
                         || text.startsWith("https://www.linkedin.com/")
                         || text.startsWith("https://snapchat.com/")
                 ) {
-                    List<CodeMessage> mediaFromDB = findMediaFromDBService.getMediaFromDB(text, chatId, botConfig.getChannel());
+/*                    List<CodeMessage> mediaFromDB = findMediaFromDBService.getMediaFromDB(text, chatId, botConfig.getChannel());
                     if (mediaFromDB != null) {
                         sendMsg(mediaFromDB);
-                    } else {
+                    } else {*/
                         Integer processMessageId = inProcess(chatId);
                         try {
                             sendMsg(generalController.handle(message, langId));
@@ -89,7 +89,7 @@ public class MainController extends TelegramLongPollingBot {
                             deleteProcess(chatId, processMessageId);
                         }
 
-                    }
+                    /*}*/
 
                 } else {
                     sendMsg(generalController.handle(message, langId));
