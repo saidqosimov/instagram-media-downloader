@@ -21,7 +21,7 @@ public class FindMediaFromDBService {
     private final MediaDataRepository mediaDataRepository;
 
     public synchronized void addMediaData(String mediaUrl, String fileId, PostType postType) {
-        if (mediaUrl.startsWith("https://www.instagram.com/p/") || mediaUrl.startsWith("https://www.instagram.com/reels/") || mediaUrl.startsWith("https://www.instagram.com/reel/") || mediaUrl.startsWith("https://www.instagram.com/tv/")) {
+        if (mediaUrl.startsWith("https://www.instagram.com/")){
             mediaUrl = "https://www.instagram.com/p/" + extractIGId(mediaUrl);
         } else if (mediaUrl.startsWith("https://www.youtube.com/") || mediaUrl.startsWith("https://youtube.com/") || mediaUrl.startsWith("https://youtu.be/")) {
             mediaUrl = "https://www.youtube.com/watch?v=" + extractVideoId(mediaUrl);
@@ -34,7 +34,7 @@ public class FindMediaFromDBService {
     }
 
     public synchronized List<CodeMessage> getMediaFromDB(String mediaUrl, Long chatId) {
-        if (mediaUrl.startsWith("https://www.instagram.com/p/") || mediaUrl.startsWith("https://www.instagram.com/reels/") || mediaUrl.startsWith("https://www.instagram.com/reel/") || mediaUrl.startsWith("https://www.instagram.com/tv/")) {
+        if (mediaUrl.startsWith("https://www.instagram.com/")) {
             mediaUrl = "https://www.instagram.com/p/" + extractIGId(mediaUrl);
         } else if (mediaUrl.startsWith("https://www.youtube.com/") || mediaUrl.startsWith("https://youtube.com/") || mediaUrl.startsWith("https://youtu.be/")) {
             mediaUrl = "https://www.youtube.com/watch?v=" + extractVideoId(mediaUrl);
