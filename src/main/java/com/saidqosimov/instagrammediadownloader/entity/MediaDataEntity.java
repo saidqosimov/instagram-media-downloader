@@ -16,8 +16,7 @@ public class MediaDataEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String mediaUrl;
-    @Column(length = 12)
-    private Integer messageId;
+    private String fileId;
     @Enumerated(EnumType.STRING)
     private PostType mediaType;
 }

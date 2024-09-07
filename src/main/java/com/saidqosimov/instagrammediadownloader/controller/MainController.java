@@ -77,10 +77,10 @@ public class MainController extends TelegramLongPollingBot {
                         || text.startsWith("https://www.linkedin.com/")
                         || text.startsWith("https://snapchat.com/")
                 ) {
-/*                    List<CodeMessage> mediaFromDB = findMediaFromDBService.getMediaFromDB(text, chatId, botConfig.getChannel());
+                    List<CodeMessage> mediaFromDB = findMediaFromDBService.getMediaFromDB(text, chatId);
                     if (mediaFromDB != null) {
                         sendMsg(mediaFromDB);
-                    } else {*/
+                    } else {
                         Integer processMessageId = inProcess(chatId);
                         try {
                             sendMsg(generalController.handle(message, langId));
@@ -89,7 +89,7 @@ public class MainController extends TelegramLongPollingBot {
                             deleteProcess(chatId, processMessageId);
                         }
 
-                    /*}*/
+                    }
 
                 } else {
                     sendMsg(generalController.handle(message, langId));
@@ -106,7 +106,7 @@ public class MainController extends TelegramLongPollingBot {
 
     }
 
-    @SneakyThrows
+/*    @SneakyThrows
     private Integer forwardMessage(Long fromChatId, Integer messageId) {
         ForwardMessage forwardMessage = ForwardMessage.builder()
                 .chatId("@" + botConfig.getChannel())
@@ -121,7 +121,7 @@ public class MainController extends TelegramLongPollingBot {
                 .build();
         execute(sendMessage);
         return execute.getMessageId();
-    }
+    }*/
 
     @SneakyThrows
     private synchronized Integer inProcess(Long chatId) {
@@ -181,8 +181,7 @@ public class MainController extends TelegramLongPollingBot {
                     try {
                         Message execute = execute(message.getSendPhoto());
                         if (message.getMediaUrl() != null) {
-                            Integer i = forwardMessage(Long.valueOf(message.getSendPhoto().getChatId()), execute.getMessageId());
-                            findMediaFromDBService.addMediaData(message.getMediaUrl(), i, PostType.PHOTO);
+                            findMediaFromDBService.addMediaData(message.getMediaUrl(), execute.getPhoto().get(0).getFileId(), PostType.PHOTO);
                         }
                     } catch (TelegramApiException e) {
                         throw new RuntimeException(e);
@@ -193,8 +192,7 @@ public class MainController extends TelegramLongPollingBot {
                     try {
                         Message execute = execute(message.getSendVideo());
                         if (message.getMediaUrl() != null) {
-                            Integer i = forwardMessage(execute.getChatId(), execute.getMessageId());
-                            findMediaFromDBService.addMediaData(message.getMediaUrl(), i, PostType.VIDEO);
+                            findMediaFromDBService.addMediaData(message.getMediaUrl(), execute.getVideo().getFileId(), PostType.VIDEO);
                         }
                     } catch (Exception e) {
                         URL url = null;
@@ -221,8 +219,7 @@ public class MainController extends TelegramLongPollingBot {
                             String fileUrl = "https://api.telegram.org/file/bot" + botConfig.getToken() + "/" + file.getFilePath();
                             System.out.println(fileUrl);*/
                             if (message.getMediaUrl() != null) {
-                                Integer i = forwardMessage(execute.getChatId(), execute.getMessageId());
-                                findMediaFromDBService.addMediaData(message.getMediaUrl(), i, PostType.VIDEO);
+                                findMediaFromDBService.addMediaData(message.getMediaUrl(), execute.getVideo().getFileId(), PostType.VIDEO);
                             }
 
                         } catch (Exception ex) {
