@@ -169,6 +169,7 @@ public class UniversalService {
                         || mediaUrl.startsWith("https://www.instagram.com/p")
                         || mediaUrl.startsWith("https://www.instagram.com/tv")
                         || mediaUrl.startsWith("https://www.linkedin.com/")
+                        || mediaUrl.startsWith("https://x.com/")
         ) {
             map.put(ServiceType.PUBLER, baseUrl.concat("publerio-downloader/param?url=").concat(mediaUrl));
             return map;
@@ -182,7 +183,6 @@ public class UniversalService {
                 mediaUrl.startsWith("https://www.pinterest.com/")
                         || mediaUrl.startsWith("https://pin.it/")
                         || mediaUrl.startsWith("https://snapchat.com/")
-                        || mediaUrl.startsWith("https://x.com/")
         ) {
             map.put(ServiceType.GET_IN_DEVICE, baseUrl.concat("getindevice-downloader/param?url=").concat(mediaUrl));
             return map;
