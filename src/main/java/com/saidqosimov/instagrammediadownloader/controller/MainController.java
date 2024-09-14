@@ -34,28 +34,26 @@ public class MainController extends TelegramLongPollingBot {
     private final FindMediaFromDBService findMediaFromDBService;
     private final GeneralController generalController;
     private final ExecutorService executorService = Executors.newFixedThreadPool(20);
-    //private final ConcurrentHashMap<Long, ConcurrentLinkedQueue<Update>> userQueues = new ConcurrentHashMap<>();
-
-    private final ConcurrentHashMap<Long, BlockingQueue<Update>> userQueues = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Long, Boolean> userProcessing = new ConcurrentHashMap<>();
 
     @Override
     public void onUpdateReceived(Update update) {
         long userId = update.getMessage().getFrom().getId();
-        userQueues.computeIfAbsent(userId, k -> new LinkedBlockingQueue<>()).offer(update);
 
-        executorService.submit(() -> processUserQueue(userId));
-    }
-
-    private void processUserQueue(long userId) {
-        BlockingQueue<Update> queue = userQueues.get(userId);
-
-        if (queue != null) {
-            Update update;
-            while ((update = queue.poll()) != null) {
-                handleUpdate(update);
-            }
+        // Agar foydalanuvchining so'rovi ishlanayotgan bo'lsa, yangi so'rovni qabul qilmaslik
+        if (userProcessing.getOrDefault(userId, false)) {
+            return;
         }
+        userProcessing.put(userId, true);
+        executorService.submit(() -> {
+            try {
+                handleUpdate(update);
+            } finally {
+                userProcessing.remove(userId);
+            }
+        });
     }
+
 
 /*
      // 20 ta iplar soni
