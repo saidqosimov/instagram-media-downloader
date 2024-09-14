@@ -23,10 +23,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 
 @Component
@@ -37,17 +34,21 @@ public class MainController extends TelegramLongPollingBot {
     private final FindMediaFromDBService findMediaFromDBService;
     private final GeneralController generalController;
     private final ExecutorService executorService = Executors.newFixedThreadPool(20);
-    private final ConcurrentHashMap<Long, ConcurrentLinkedQueue<Update>> userQueues = new ConcurrentHashMap<>();
+    //private final ConcurrentHashMap<Long, ConcurrentLinkedQueue<Update>> userQueues = new ConcurrentHashMap<>();
+
+    private final ConcurrentHashMap<Long, BlockingQueue<Update>> userQueues = new ConcurrentHashMap<>();
 
     @Override
     public void onUpdateReceived(Update update) {
         long userId = update.getMessage().getFrom().getId();
-        userQueues.computeIfAbsent(userId, k -> new ConcurrentLinkedQueue<>()).offer(update);
+        userQueues.computeIfAbsent(userId, k -> new LinkedBlockingQueue<>()).offer(update);
+
         executorService.submit(() -> processUserQueue(userId));
     }
 
     private void processUserQueue(long userId) {
-        ConcurrentLinkedQueue<Update> queue = userQueues.get(userId);
+        BlockingQueue<Update> queue = userQueues.get(userId);
+
         if (queue != null) {
             Update update;
             while ((update = queue.poll()) != null) {
@@ -55,6 +56,7 @@ public class MainController extends TelegramLongPollingBot {
             }
         }
     }
+
 /*
      // 20 ta iplar soni
 
