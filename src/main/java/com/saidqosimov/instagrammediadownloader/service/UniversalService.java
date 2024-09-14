@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +32,7 @@ public class UniversalService {
     private final FindMediaFromDBService findMediaFromDBService;
 
     public synchronized List<CodeMessage> getMediaData(Message message, int langId) {
-        String mediaUrl = message.getText();
+        String mediaUrl = extractURL(message.getText());
         System.out.println(mediaUrl);
         Long chatId = message.getChatId();
         List<CodeMessage> codeMessageList = new LinkedList<>();
@@ -204,6 +206,19 @@ public class UniversalService {
             map.put(ServiceType.FACEBOOK, baseUrl.concat("fb-video-downloader/param?url=").concat(mediaUrl));
             return map;
         }
+        return null;
+    }
+
+    public static String extractURL(String text) {
+        // URL'larni aniqlash uchun regex pattern
+        String urlPattern = "\\b(?:https?://|www\\.)\\S+\\b";
+        Pattern pattern = Pattern.compile(urlPattern, Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(text);
+        // Birinchi URL'ni topish
+        if (matcher.find()) {
+            return matcher.group();
+        }
+        // URL topilmasa, null qaytaradi
         return null;
     }
 }

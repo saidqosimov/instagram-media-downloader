@@ -23,8 +23,11 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
 
 @Component
 @RequiredArgsConstructor
@@ -33,12 +36,33 @@ public class MainController extends TelegramLongPollingBot {
     private final TelegramUsersService telegramUsersService;
     private final FindMediaFromDBService findMediaFromDBService;
     private final GeneralController generalController;
-    private final ExecutorService executorService = Executors.newFixedThreadPool(20); // 20 ta iplar soni
+    private final ExecutorService executorService = Executors.newFixedThreadPool(20);
+    private final ConcurrentHashMap<Long, ConcurrentLinkedQueue<Update>> userQueues = new ConcurrentHashMap<>();
+
+    @Override
+    public void onUpdateReceived(Update update) {
+        long userId = update.getMessage().getFrom().getId();
+        userQueues.computeIfAbsent(userId, k -> new ConcurrentLinkedQueue<>()).offer(update);
+        executorService.submit(() -> processUserQueue(userId));
+    }
+
+    private void processUserQueue(long userId) {
+        ConcurrentLinkedQueue<Update> queue = userQueues.get(userId);
+        if (queue != null) {
+            Update update;
+            while ((update = queue.poll()) != null) {
+                handleUpdate(update);
+            }
+        }
+    }
+/*
+     // 20 ta iplar soni
 
     @Override
     public void onUpdateReceived(Update update) {
         executorService.submit(() -> handleUpdate(update));
     }
+*/
 
     private void handleUpdate(Update update) {
         if (update.hasMessage()) {
@@ -60,21 +84,21 @@ public class MainController extends TelegramLongPollingBot {
                     return;
                 }
                 String text = message.getText();
-                if (text.startsWith("https://www.instagram.com/")
-                        || text.startsWith("https://www.youtube.com/")
-                        || text.startsWith("https://youtube.com/")
-                        || text.startsWith("https://www.tiktok.com/")
-                        || text.startsWith("https://vt.tiktok.com/")
-                        || text.startsWith("https://vm.tiktok.com/")
-                        || text.startsWith("https://m.tiktok.com/")
-                        || text.startsWith("https://youtu.be/")
-                        || text.startsWith("https://fb.watch/")
-                        || text.startsWith("https://www.facebook.com/")
-                        || text.startsWith("https://x.com/")
-                        || text.startsWith("https://www.pinterest.com/")
-                        || text.startsWith("https://pin.it/")
-                        || text.startsWith("https://www.linkedin.com/")
-                        || text.startsWith("https://snapchat.com/")
+                if (text.contains("https://www.instagram.com/")
+                        || text.contains("https://www.youtube.com/")
+                        || text.contains("https://youtube.com/")
+                        || text.contains("https://www.tiktok.com/")
+                        || text.contains("https://vt.tiktok.com/")
+                        || text.contains("https://vm.tiktok.com/")
+                        || text.contains("https://m.tiktok.com/")
+                        || text.contains("https://youtu.be/")
+                        || text.contains("https://fb.watch/")
+                        || text.contains("https://www.facebook.com/")
+                        || text.contains("https://x.com/")
+                        || text.contains("https://www.pinterest.com/")
+                        || text.contains("https://pin.it/")
+                        || text.contains("https://www.linkedin.com/")
+                        || text.contains("https://snapchat.com/")
                 ) {
                     Integer processMessageId = inProcess(chatId);
                     try {
