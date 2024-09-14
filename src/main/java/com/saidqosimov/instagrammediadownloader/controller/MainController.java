@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
@@ -77,20 +76,13 @@ public class MainController extends TelegramLongPollingBot {
                         || text.startsWith("https://www.linkedin.com/")
                         || text.startsWith("https://snapchat.com/")
                 ) {
-                    List<CodeMessage> mediaFromDB = findMediaFromDBService.getMediaFromDB(text, chatId);
-                    if (mediaFromDB != null) {
-                        sendMsg(mediaFromDB);
-                    } else {
-                        Integer processMessageId = inProcess(chatId);
-                        try {
-                            sendMsg(generalController.handle(message, langId));
-                            deleteProcess(chatId, processMessageId);
-                        } catch (Exception e) {
-                            deleteProcess(chatId, processMessageId);
-                        }
-
+                    Integer processMessageId = inProcess(chatId);
+                    try {
+                        sendMsg(generalController.getMedia(message, langId));
+                        deleteProcess(chatId, processMessageId);
+                    } catch (Exception e) {
+                        deleteProcess(chatId, processMessageId);
                     }
-
                 } else {
                     sendMsg(generalController.handle(message, langId));
                 }

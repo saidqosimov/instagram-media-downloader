@@ -21,10 +21,16 @@ public class FindMediaFromDBService {
     private final MediaDataRepository mediaDataRepository;
 
     public synchronized void addMediaData(String mediaUrl, String fileId, PostType postType) {
-        if (mediaUrl.startsWith("https://www.instagram.com/")){
-            mediaUrl = "https://www.instagram.com/p/" + extractIGId(mediaUrl);
+        if (mediaUrl.startsWith("https://www.instagram.com/")) {
+            String igId = extractIGId(mediaUrl);
+            if (!igId.isEmpty()) {
+                mediaUrl = "https://www.instagram.com/p/" + igId;
+            }
         } else if (mediaUrl.startsWith("https://www.youtube.com/") || mediaUrl.startsWith("https://youtube.com/") || mediaUrl.startsWith("https://youtu.be/")) {
-            mediaUrl = "https://www.youtube.com/watch?v=" + extractVideoId(mediaUrl);
+            String evi = extractVideoId(mediaUrl);
+            if (!evi.isEmpty()) {
+                mediaUrl = "https://www.youtube.com/watch?v=" + evi;
+            }
         }
         MediaDataEntity mediaDataEntity = new MediaDataEntity();
         mediaDataEntity.setMediaUrl(mediaUrl);
@@ -35,9 +41,15 @@ public class FindMediaFromDBService {
 
     public synchronized List<CodeMessage> getMediaFromDB(String mediaUrl, Long chatId) {
         if (mediaUrl.startsWith("https://www.instagram.com/")) {
-            mediaUrl = "https://www.instagram.com/p/" + extractIGId(mediaUrl);
+            String igId = extractIGId(mediaUrl);
+            if (!igId.isEmpty()) {
+                mediaUrl = "https://www.instagram.com/p/" + igId;
+            }
         } else if (mediaUrl.startsWith("https://www.youtube.com/") || mediaUrl.startsWith("https://youtube.com/") || mediaUrl.startsWith("https://youtu.be/")) {
-            mediaUrl = "https://www.youtube.com/watch?v=" + extractVideoId(mediaUrl);
+            String evi = extractVideoId(mediaUrl);
+            if (!evi.isEmpty()) {
+                mediaUrl = "https://www.youtube.com/watch?v=" + evi;
+            }
         }
         List<CodeMessage> codeMessageList = new LinkedList<>();
         List<MediaDataEntity> mediaDataEntitiesByMediaUrl = mediaDataRepository.findMediaDataEntitiesByMediaUrl(mediaUrl);
@@ -77,7 +89,7 @@ public class FindMediaFromDBService {
             // Extract video ID for youtu.be links
             int indexOfBe = url.indexOf("youtu.be/");
             return url.substring(indexOfBe + 9, indexOfBe + 20);
-        } else if (url.contains("youtube.com/shorts/")) {
+        } else if (url.contains("/shorts/")) {
             // Extract video ID for youtube.com/shorts links
             int indexOfShorts = url.indexOf("shorts/");
             return url.substring(indexOfShorts + 7, indexOfShorts + 18);

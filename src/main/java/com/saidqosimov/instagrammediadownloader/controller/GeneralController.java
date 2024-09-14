@@ -27,6 +27,14 @@ public class GeneralController {
     private final TelegramUsersService telegramUsersService;
     private final BotConfig botConfig;
 
+    public synchronized List<CodeMessage> getMedia(Message message, int langId) {
+        List<CodeMessage> urlData = universalService.getMediaData(message, langId);
+        if (urlData.isEmpty()) {
+            urlData.add(getCodeMessage(Constants.COMMAND_NOT_FOUND[langId], message.getChatId(), null));
+        }
+        return urlData;
+    }
+
     public synchronized List<CodeMessage> handle(Message message, int langId) {
         List<CodeMessage> response = new LinkedList<>();
         Long chatId = message.getChatId();
@@ -35,11 +43,6 @@ public class GeneralController {
             if (text.equals(Constants.START)) {
                 response.add(getCodeMessage(Constants.START_GUIDE[langId], chatId, mainKeyboards.getGuideButton(langId)));
                 return response;
-            } else if (text.startsWith("https://")) {
-                List<CodeMessage> urlData = universalService.getMediaData(message, langId);
-                if (!urlData.isEmpty()) {
-                    return urlData;
-                }
             } else if (text.equals(Constants.HELP)) {
                 response.add(getCodeMessage(Constants.HELP_GUIDE[langId], chatId, null));
                 return response;

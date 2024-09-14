@@ -27,6 +27,7 @@ public class UniversalService {
     private final StoriesService storiesService;
     private final FacebookService facebookService;
     private final PublerService publerService;
+    private final FindMediaFromDBService findMediaFromDBService;
 
     public synchronized List<CodeMessage> getMediaData(Message message, int langId) {
         String mediaUrl = message.getText();
@@ -34,6 +35,10 @@ public class UniversalService {
         Long chatId = message.getChatId();
         List<CodeMessage> codeMessageList = new LinkedList<>();
         Map<ServiceType, String> requestUrl = getRequestUrl(mediaUrl);
+        List<CodeMessage> mediaFromDB = findMediaFromDBService.getMediaFromDB(mediaUrl, chatId);
+        if (mediaFromDB != null) {
+            return mediaFromDB;
+        }
         if (requestUrl == null) {
             CodeMessage codeMessage = CodeMessage.builder()
                     .messageType(MessageType.SEND_MESSAGE)
