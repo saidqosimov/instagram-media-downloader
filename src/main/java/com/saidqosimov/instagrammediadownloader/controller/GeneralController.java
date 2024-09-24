@@ -35,7 +35,7 @@ public class GeneralController {
         return urlData;
     }
 
-    public synchronized List<CodeMessage> handle(Message message, int langId) {
+    public List<CodeMessage> handle(Message message, int langId) {
         List<CodeMessage> response = new LinkedList<>();
         Long chatId = message.getChatId();
         if (message.hasText()) {

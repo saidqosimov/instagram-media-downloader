@@ -33,12 +33,19 @@ public class MainController extends TelegramLongPollingBot {
     private final TelegramUsersService telegramUsersService;
     private final FindMediaFromDBService findMediaFromDBService;
     private final GeneralController generalController;
-    private final ExecutorService executorService = Executors.newFixedThreadPool(20);
+    private final ExecutorService executorService = Executors.newFixedThreadPool(30);
     private final ConcurrentHashMap<Long, Boolean> userProcessing = new ConcurrentHashMap<>();
 
     @Override
     public void onUpdateReceived(Update update) {
-        long userId = update.getMessage().getFrom().getId();
+
+        long userId;
+        if (update.hasMessage()) {
+            userId = update.getMessage().getFrom().getId();
+        } else {
+            userId = update.getCallbackQuery().getFrom().getId();
+        }
+
 
         // Agar foydalanuvchining so'rovi ishlanayotgan bo'lsa, yangi so'rovni qabul qilmaslik
         if (userProcessing.getOrDefault(userId, false)) {
@@ -56,8 +63,6 @@ public class MainController extends TelegramLongPollingBot {
 
 
 /*
-     // 20 ta iplar soni
-
     @Override
     public void onUpdateReceived(Update update) {
         executorService.submit(() -> handleUpdate(update));
@@ -121,6 +126,12 @@ public class MainController extends TelegramLongPollingBot {
         }
 
     }
+
+/*    public CodeMessage sendAds(Message message){
+
+        return null;
+    }*/
+
 
 /*    @SneakyThrows
     private Integer forwardMessage(Long fromChatId, Integer messageId) {
