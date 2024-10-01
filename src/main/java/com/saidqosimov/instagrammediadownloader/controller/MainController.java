@@ -5,6 +5,7 @@ import com.saidqosimov.instagrammediadownloader.entity.TelegramUsers;
 import com.saidqosimov.instagrammediadownloader.enums.Language;
 import com.saidqosimov.instagrammediadownloader.enums.PostType;
 import com.saidqosimov.instagrammediadownloader.model.CodeMessage;
+import com.saidqosimov.instagrammediadownloader.service.AdsService;
 import com.saidqosimov.instagrammediadownloader.service.FindMediaFromDBService;
 import com.saidqosimov.instagrammediadownloader.service.TelegramUsersService;
 import com.saidqosimov.instagrammediadownloader.utils.Constants;
@@ -13,6 +14,7 @@ import lombok.SneakyThrows;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.*;
@@ -35,6 +37,7 @@ public class MainController extends TelegramLongPollingBot {
     private final GeneralController generalController;
     private final ExecutorService executorService = Executors.newFixedThreadPool(30);
     private final ConcurrentHashMap<Long, Boolean> userProcessing = new ConcurrentHashMap<>();
+    private final AdsService adsService;
 
     @Override
     public void onUpdateReceived(Update update) {
@@ -42,8 +45,10 @@ public class MainController extends TelegramLongPollingBot {
         long userId;
         if (update.hasMessage()) {
             userId = update.getMessage().getFrom().getId();
-        } else {
+        } else if (update.hasCallbackQuery()) {
             userId = update.getCallbackQuery().getFrom().getId();
+        } else {
+            userId = 0;
         }
 
 
@@ -73,6 +78,7 @@ public class MainController extends TelegramLongPollingBot {
         if (update.hasMessage()) {
             Long chatId = update.getMessage().getChatId();
             Message message = update.getMessage();
+
             if (update.getMessage().hasText()) {
                 if (telegramUsersService.checkUser(chatId)) {
                     telegramUsersService.save(message);
@@ -123,32 +129,16 @@ public class MainController extends TelegramLongPollingBot {
             if (data.equals("uz") || data.equals("en") || data.equals("ru")) {
                 sendMsg(generalController.handle(callbackQuery));
             }
+        } else if (update.hasChannelPost()) {
+            Message message = update.getChannelPost();
+            System.out.println(message);
+            System.out.println(message.getChatId());
+            System.out.println(botConfig.getChannel());
+            if (message.getChatId().equals(botConfig.getChannel())) {
+                sendAds(adsService.adsSend(message));
+            }
         }
-
     }
-
-/*    public CodeMessage sendAds(Message message){
-
-        return null;
-    }*/
-
-
-/*    @SneakyThrows
-    private Integer forwardMessage(Long fromChatId, Integer messageId) {
-        ForwardMessage forwardMessage = ForwardMessage.builder()
-                .chatId("@" + botConfig.getChannel())
-                .messageId(messageId)
-                .fromChatId(fromChatId)
-                .build();
-        Message execute = execute(forwardMessage);
-        SendMessage sendMessage = SendMessage.builder()
-                .chatId("@" + botConfig.getChannel())
-                .replyToMessageId(execute.getMessageId())
-                .text(fromChatId.toString())
-                .build();
-        execute(sendMessage);
-        return execute.getMessageId();
-    }*/
 
     @SneakyThrows
     private synchronized Integer inProcess(Long chatId) {
@@ -175,6 +165,60 @@ public class MainController extends TelegramLongPollingBot {
                 .messageId(processMessageId)
                 .build();
         execute(deleteMessage);
+    }
+
+    private synchronized void sendAds(List<CodeMessage> messageList) {
+        long successSend = 0;
+        long failedSend = 0;
+        long blockedUser = 0;
+        for (CodeMessage message : messageList) {
+            switch (message.getMessageType()) {
+                case SEND_MESSAGE -> {
+                    try {
+                        execute(message.getSendMessage());
+                        successSend++;
+                    } catch (TelegramApiException e) {
+                        if (e.getMessage().contains("403")) {
+                            blockedUser++;
+                        }
+                        failedSend++;
+                    }
+                    break;
+                }
+                case SEND_PHOTO -> {
+                    try {
+                        execute(message.getSendPhoto());
+                        successSend++;
+                    } catch (TelegramApiException e) {
+                        if (e.getMessage().contains("403")) {
+                            blockedUser++;
+                        }
+                        failedSend++;
+                    }
+                    break;
+                }
+                case SEND_VIDEO -> {
+                    try {
+                        execute(message.getSendVideo());
+                        successSend++;
+                    } catch (TelegramApiException e) {
+                        if (e.getMessage().contains("403")) {
+                            blockedUser++;
+                        }
+                        failedSend++;
+                    }
+                    break;
+                }
+            }
+        }
+        try {
+            execute(SendMessage.builder()
+                    .chatId(botConfig.getAdmin())
+                    .text("Success send : " + successSend + "\nFailed send : " + failedSend + "\nBlocked user : " + blockedUser)
+                    .build());
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private synchronized void sendMsg(List<CodeMessage> messageList) {

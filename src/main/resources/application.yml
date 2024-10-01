@@ -5,16 +5,16 @@ bot.token:
 bot.admin:
   5540407547
 bot.channel:
-  c38ncy7tx389to8rcn946ncq76cn9wcr
+  -1001667984321
 
 spring:
   datasource:
-    #url: jdbc:postgresql://localhost:5432/postgres
-    #username: postgres
-    #password: 1
-    url: jdbc:postgresql://monorail.proxy.rlwy.net:39850/railway
+    url: jdbc:postgresql://localhost:5432/postgres
     username: postgres
-    password: kHHMEOcqeelVDLzGZGEYKaqnycgyBACa
+    password: 1
+    #url: jdbc:postgresql://monorail.proxy.rlwy.net:39850/railway
+    #username: postgres
+    #password: kHHMEOcqeelVDLzGZGEYKaqnycgyBACa
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:

@@ -28,7 +28,7 @@ public class TelegramUsers implements Serializable {
     private String username;
     private boolean enabled = true;
 }
-/*SELECT setval('telegram_users_id_seq', (SELECT MAX(id) FROM telegram_users));
+    /*SELECT setval('telegram_users_id_seq', (SELECT MAX(id) FROM telegram_users));
 
 PGPASSWORD=kHHMEOcqeelVDLzGZGEYKaqnycgyBACa psql -h monorail.proxy.rlwy.net -U postgres -p 39850 -d railway
 
