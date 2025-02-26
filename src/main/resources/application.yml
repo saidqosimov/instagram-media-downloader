@@ -9,9 +9,12 @@ bot.channel:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
+#    url: jdbc:postgresql://localhost:5432/postgres
+#    username: postgres
+#    password: 1
+    url: jdbc:postgresql://turntable.proxy.rlwy.net:21684/railway
     username: postgres
-    password: 1
+    password: DVCHSxceORgawMwmRvKnRpTmfuUQeDND
     #url: jdbc:postgresql://monorail.proxy.rlwy.net:39850/railway
     #username: postgres
     #password: kHHMEOcqeelVDLzGZGEYKaqnycgyBACa
