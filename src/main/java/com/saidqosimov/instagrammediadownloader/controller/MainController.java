@@ -96,20 +96,21 @@ public class MainController extends TelegramLongPollingBot {
                 }
                 String text = message.getText();
                 if (text.contains("https://www.instagram.com/")
-                        || text.contains("https://www.youtube.com/")
-                        || text.contains("https://youtube.com/")
+                       // || text.contains("https://www.youtube.com/")
+                        //|| text.contains("https://youtube.com/")
                         || text.contains("https://www.tiktok.com/")
                         || text.contains("https://vt.tiktok.com/")
                         || text.contains("https://vm.tiktok.com/")
                         || text.contains("https://m.tiktok.com/")
-                        || text.contains("https://youtu.be/")
+                        //|| text.contains("https://youtu.be/")
                         || text.contains("https://fb.watch/")
                         || text.contains("https://www.facebook.com/")
-                        || text.contains("https://x.com/")
+                        //|| text.contains("https://x.com/")
                         || text.contains("https://www.pinterest.com/")
                         || text.contains("https://pin.it/")
                         || text.contains("https://www.linkedin.com/")
                         || text.contains("https://snapchat.com/")
+                        || text.contains("https://www.snapchat.com/")
                 ) {
                     Integer processMessageId = inProcess(chatId);
                     try {
@@ -125,15 +126,11 @@ public class MainController extends TelegramLongPollingBot {
         } else if (update.hasCallbackQuery()) {
             CallbackQuery callbackQuery = update.getCallbackQuery();
             String data = callbackQuery.getData();
-            System.out.println(data);
             if (data.equals("uz") || data.equals("en") || data.equals("ru")) {
                 sendMsg(generalController.handle(callbackQuery));
             }
         } else if (update.hasChannelPost()) {
             Message message = update.getChannelPost();
-            System.out.println(message);
-            System.out.println(message.getChatId());
-            System.out.println(botConfig.getChannel());
             if (message.getChatId().equals(botConfig.getChannel())) {
                 sendAds(adsService.adsSend(message));
             }
@@ -285,10 +282,6 @@ public class MainController extends TelegramLongPollingBot {
                         sendVideo.setVideo(inputFile);
                         try {
                             Message execute = execute(sendVideo);
-/*                            GetFile getFileRequest = new GetFile(execute.getVideo().getFileId());
-                            File file = execute(getFileRequest);
-                            String fileUrl = "https://api.telegram.org/file/bot" + botConfig.getToken() + "/" + file.getFilePath();
-                            System.out.println(fileUrl);*/
                             if (message.getMediaUrl() != null) {
                                 findMediaFromDBService.addMediaData(message.getMediaUrl(), execute.getVideo().getFileId(), PostType.VIDEO);
                             }

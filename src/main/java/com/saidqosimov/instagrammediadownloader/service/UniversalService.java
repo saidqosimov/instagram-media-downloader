@@ -24,11 +24,7 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class UniversalService {
     private final InstagramService instagramService;
-    private final YoutubeService youtubeService;
     private final GetInDeviceService getInDeviceService;
-    private final StoriesService storiesService;
-    private final FacebookService facebookService;
-    private final PublerService publerService;
     private final FindMediaFromDBService findMediaFromDBService;
 
     public synchronized List<CodeMessage> getMediaData(Message message, int langId) {
@@ -51,11 +47,6 @@ public class UniversalService {
                     .build();
             codeMessageList.add(codeMessage);
             return codeMessageList;
-        } else if (requestUrl.containsKey(ServiceType.PUBLER)) {
-            List<Map<PostType, String>> publerMedia = publerService.getMediaData(requestUrl.get(ServiceType.PUBLER));
-            if (publerMedia != null) {
-                return getCodeMessages(chatId, codeMessageList, publerMedia, mediaUrl);
-            }
         } else if (requestUrl.containsKey(ServiceType.INSTAGRAM)) {
             System.out.println(requestUrl.get(ServiceType.INSTAGRAM));
             List<Map<PostType, String>> instagramMedia = instagramService.getInstagramMedia(requestUrl.get(ServiceType.INSTAGRAM));
@@ -63,46 +54,12 @@ public class UniversalService {
                 return getCodeMessages(chatId, codeMessageList, instagramMedia, mediaUrl);
             }
         } else if (requestUrl.containsKey(ServiceType.YOUTUBE)) {
-            Map<PostType, String> youtubeMedia = youtubeService.getYoutubeMedia(requestUrl.get(ServiceType.YOUTUBE));
-            if (youtubeMedia != null) {
-                return getCodeMessage(chatId, codeMessageList, youtubeMedia, mediaUrl);
-            }
-        } else if (requestUrl.containsKey(ServiceType.FACEBOOK)) {
-            Map<PostType, String> fbMedia = facebookService.getFbMedia(requestUrl.get(ServiceType.FACEBOOK));
-            if (fbMedia != null) {
-                return getCodeMessage(chatId, codeMessageList, fbMedia, mediaUrl);
-            }
-        } else if (requestUrl.containsKey(ServiceType.GET_IN_DEVICE)) {
+
+        } else if (requestUrl.containsKey(ServiceType.GET_IN_DEVICE) || requestUrl.containsKey(ServiceType.FACEBOOK)) {
             List<Map<PostType, String>> getInDeviceMedia = getInDeviceService.getInDeviceMedia(requestUrl.get(ServiceType.GET_IN_DEVICE));
             if (getInDeviceMedia != null) {
                 return getCodeMessages(chatId, codeMessageList, getInDeviceMedia, mediaUrl);
             }
-        } else if (requestUrl.containsKey(ServiceType.STORIES)) {
-            List<Map<PostType, String>> stories = storiesService.getStories(requestUrl.get(ServiceType.STORIES));
-            System.out.println(stories);
-            if (stories == null) {
-                CodeMessage codeMessage = new CodeMessage();
-                codeMessage.setMessageType(MessageType.SEND_MESSAGE);
-                SendMessage sendMessage = SendMessage.builder()
-                        .chatId(chatId)
-                        .text(Constants.STORIES_NOT_FOUND[langId])
-                        //.text(Constants.USERNAME_ERROR[langId])
-                        .build();
-                codeMessage.setSendMessage(sendMessage);
-                codeMessageList.add(codeMessage);
-                return codeMessageList;
-            } /*else if (stories.isEmpty()) {
-                CodeMessage codeMessage = new CodeMessage();
-                codeMessage.setMessageType(MessageType.SEND_MESSAGE);
-                SendMessage sendMessage = SendMessage.builder()
-                        .chatId(chatId)
-                        .text(Constants.STORIES_NOT_FOUND[langId])
-                        .build();
-                codeMessage.setSendMessage(sendMessage);
-                codeMessageList.add(codeMessage);
-                return codeMessageList;
-            }*/
-            return getCodeMessages(chatId, codeMessageList, stories, mediaUrl);
         }
         CodeMessage codeMessage = new CodeMessage();
         codeMessage.setMessageType(MessageType.SEND_MESSAGE);
@@ -164,61 +121,49 @@ public class UniversalService {
     private synchronized Map<ServiceType, String> getRequestUrl(String mediaUrl) {
         Map<ServiceType, String> map = new HashMap<>();
         //String baseUrl = "https://rest-instagram-production.up.railway.app/api/";
-        String baseUrl = "http://ec2-3-79-19-72.eu-central-1.compute.amazonaws.com:8085/api/";
-        //String baseUrl = "http://localhost:8085/api/";
-
+        //String baseUrl = "http://35.159.83.128:8085/api/";
+        String baseUrl = "http://localhost:8085/api/";
         if (
-                mediaUrl.startsWith("https://www.tiktok.com/")
+                mediaUrl.startsWith("https://www.pinterest.com/")
+                        || mediaUrl.startsWith("https://pin.it/")
+                        || mediaUrl.startsWith("https://snapchat.com/")
+                        || mediaUrl.startsWith("https://www.snapchat.com/")
+                        || mediaUrl.startsWith("https://www.facebook.com/")
+                        || mediaUrl.startsWith("https://fb.watch/")
+                        || mediaUrl.startsWith("https://www.tiktok.com/")
                         || mediaUrl.startsWith("https://vt.tiktok.com/")
                         || mediaUrl.startsWith("https://vm.tiktok.com/")
                         || mediaUrl.startsWith("https://www.instagram.com/reel")
                         || mediaUrl.startsWith("https://www.instagram.com/reels")
                         || mediaUrl.startsWith("https://www.instagram.com/p")
                         || mediaUrl.startsWith("https://www.instagram.com/tv")
-                        || mediaUrl.startsWith("https://www.linkedin.com/")
-                        || mediaUrl.startsWith("https://x.com/")
-        ) {
-            map.put(ServiceType.PUBLER, baseUrl.concat("publerio-downloader/param?url=").concat(mediaUrl));
-            return map;
-        } else if (mediaUrl.startsWith("https://www.instagram.com/stories/highlights/")) {
-            map.put(ServiceType.STORIES, baseUrl.concat("instagram-highlights-downloader/param?url=").concat(mediaUrl));
-            return map;
-        } else if (mediaUrl.startsWith("https://www.instagram.com/stories/")) {
-            map.put(ServiceType.STORIES, baseUrl.concat("instagram-stories-downloader/param?url=").concat(mediaUrl));
-            return map;
-        } else if (
-                mediaUrl.startsWith("https://www.pinterest.com/")
-                        || mediaUrl.startsWith("https://pin.it/")
-                        || mediaUrl.startsWith("https://snapchat.com/")
+            // mediaUrl.startsWith("https://x.com/")
         ) {
             map.put(ServiceType.GET_IN_DEVICE, baseUrl.concat("getindevice-downloader/param?url=").concat(mediaUrl));
             return map;
-        } else if (mediaUrl.startsWith("https://www.instagram.com/")) {
+        } /*else if (mediaUrl.startsWith("https://www.instagram.com/reel")
+                || mediaUrl.startsWith("https://www.instagram.com/reels")
+                || mediaUrl.startsWith("https://www.instagram.com/p")
+                || mediaUrl.startsWith("https://www.instagram.com/tv")) {
             map.put(ServiceType.INSTAGRAM, baseUrl.concat("instagram-photo-video-carousel-downloader/param?url=").concat(mediaUrl));
+
             return map;
         } else if (mediaUrl.startsWith("https://youtube.com/")
                 || mediaUrl.startsWith("https://www.youtube.com/")
                 || mediaUrl.startsWith("https://youtu.be/")) {
             map.put(ServiceType.YOUTUBE, baseUrl.concat("youtube-video-downloader/param?url=").concat(mediaUrl));
             return map;
-        } else if (mediaUrl.startsWith("https://www.facebook.com/")
-                || mediaUrl.startsWith("https://fb.watch/")) {
-            map.put(ServiceType.FACEBOOK, baseUrl.concat("fb-video-downloader/param?url=").concat(mediaUrl));
-            return map;
-        }
+        }*/
         return null;
     }
 
     public static String extractURL(String text) {
-        // URL'larni aniqlash uchun regex pattern
         String urlPattern = "\\b(?:https?://|www\\.)\\S+\\b";
         Pattern pattern = Pattern.compile(urlPattern, Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(text);
-        // Birinchi URL'ni topish
         if (matcher.find()) {
             return matcher.group();
         }
-        // URL topilmasa, null qaytaradi
         return null;
     }
 }
